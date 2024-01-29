@@ -1,6 +1,9 @@
 import subprocess
 import os, sys
 
+total_wins = 0
+total_losses = 0
+total_runs = 0
 
 def show_match(bot, opponent_bot, map_num):
     """
@@ -16,14 +19,15 @@ def show_match(bot, opponent_bot, map_num):
 
 
 def test(bot, opponent_bot, map_num):
+    global total_wins, total_losses, total_runs
     """ Runs an instance of Planet Wars between the two given bots on the specified map. """
     bot_name, opponent_name = bot.split('/')[1].split('.')[0], opponent_bot.split('/')[1].split('.')[0]
-    print('Running test:',bot_name,'vs',opponent_name)
+    # print('Running test:',bot_name,'vs',opponent_name)
     command = 'java -jar tools/PlayGame.jar maps/map' + str(map_num) +'.txt 1000 1000 log.txt ' + \
               '"python ' + bot + '" ' + \
               '"python ' + opponent_bot + '" '
 
-    print(command)
+    # print(command)
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
 
     while True:
@@ -37,15 +41,18 @@ def test(bot, opponent_bot, map_num):
             break
         elif '1 crashed' in line:
             print(bot_name, 'crashed.')
+            sys.exit()
             break
         elif '2 crashed' in line:
             print(opponent_name, 'crashed')
             break
         elif 'Player 1 Wins!' in line:
-            print(bot_name,'wins!')
+            total_wins += 1
+            # print(bot_name,'wins!')
             break
         elif 'Player 2 Wins!' in line:
-            print(opponent_name,'wins!')
+            total_losses += 1
+            # print(opponent_name,'wins!')
             break
 
         if return_code is not None:
@@ -60,14 +67,34 @@ if __name__ == '__main__':
                  'opponent_bots/defensive_bot.py',
                  'opponent_bots/production_bot.py']
 
-    maps = [71, 13, 24, 56, 7]
+    # maps = [71, 13, 24, 56, 7]
+    maps = [i for i in range(1, 101)]
 
     my_bot = 'behavior_tree_bot/bt_bot.py'
     show = len(sys.argv) < 2 or sys.argv[1] == "show"
-    for opponent, map in zip(opponents, maps):
+    # for opponent, map in zip(opponents, maps):
+    #     # use this command if you want to observe the bots
+    #     if show:
+    #         show_match(my_bot, opponent, map)
+    #     else:
+    #         # use this command if you just want the results of the matches reported
+    #         test(my_bot, opponent, map)
+
+    for opponent in opponents:
         # use this command if you want to observe the bots
-        if show:
-            show_match(my_bot, opponent, map)
-        else:
-            # use this command if you just want the results of the matches reported
-            test(my_bot, opponent, map)
+        total_losses = 0
+        total_wins = 0
+        total_runs = 0
+        for map in maps:
+            total_runs += 1
+            if show:
+                show_match(my_bot, opponent, map)
+            else:
+                # use this command if you just want the results of the matches reported
+                test(my_bot, opponent, map)
+        print("opponent:", opponent)
+        print("total_runs:", total_runs)
+        print("total_wins:", total_wins)
+        print("total_losses:", total_losses)
+        print("-------------------------------------------------------------------------------------")
+
