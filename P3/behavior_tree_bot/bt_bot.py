@@ -2,6 +2,7 @@
 #
 
 """
+// This is where you impement your overall strategy to play the game. 
 // There is already a basic strategy in place here. You can use it as a
 // starting point, or you can throw it out entirely and replace it with your
 // own.
@@ -18,7 +19,6 @@ from behavior_tree_bot.bt_nodes import Selector, Sequence, Action, Check
 
 from planet_wars import PlanetWars, finish_turn
 
-
 # You have to improve this tree or create an entire new one that is capable
 # of winning against all the 5 opponent bots
 def setup_behavior_tree():
@@ -26,23 +26,34 @@ def setup_behavior_tree():
     # Top-down construction of behavior tree
     root = Selector(name='High Level Ordering of Strategies')
 
+    # The start sequence will run the production bot to take over the cloest
+    # planets from its starting planet. The production bot's
+    # strategy fits our needs for this. This will only run until a certain
+    # number of planets have been taken over. 
+    starting_strategy = Sequence(name="Starting Strategy")
+    few_planets_check = Check(few_planets)
+    start_spread = Action(take_turn)
+    starting_strategy.child_nodes = [few_planets_check, start_spread]
+
     offensive_plan = Sequence(name='Offensive Strategy')
-    num_planet_check = Check(check_num_planets)
-    attack = Action(attack_planet)
-    offensive_plan.child_nodes = [num_planet_check, attack]
+    largest_fleet_check = Check(have_largest_fleet)
+    aggressive_attack = Action(attack)
+    offensive_plan.child_nodes = [largest_fleet_check, aggressive_attack]
 
-    spread_sequence = Sequence(name='Spread Strategy')
-    neutral_planet_check = Check(if_neutral_planet_available)
-    spread_action = Action(spread_planet)
-    spread_sequence.child_nodes = [neutral_planet_check, spread_action]
+    spread_plan = Sequence(name='Spread Strategy')
+    spread_action = Action(spread)
+    spread_plan.child_nodes = [spread_action]
 
+    defensive_plan = Sequence(name='Defensive Strategy')
+    defend_action = Action(defend)
+    defensive_plan.child_nodes = [defend_action]
 
-    defensive = Action(defend)
-
-    root.child_nodes = [offensive_plan, spread_sequence, defensive]
+    root.child_nodes = [starting_strategy, offensive_plan, spread_plan, defensive_plan]
 
     logging.info('\n' + root.tree_to_string())
     return root
+
+
 
 # You don't need to change this function
 def do_turn(state):
@@ -69,3 +80,4 @@ if __name__ == '__main__':
     except Exception:
         traceback.print_exc(file=sys.stdout)
         logging.exception("Error in bot.")
+
