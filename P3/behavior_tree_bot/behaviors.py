@@ -102,20 +102,24 @@ def attack(state):
 
 # From Production Bot 
 def take_turn(state):
-    planet = state.my_planets()[0]
+    my_planets = state.my_planets()
+    
+    if not my_planets:
+        # Handle the case when there are no planets owned by the player
+        return False
+
+    planet = my_planets[0]
     least_distance = float('inf')
     nearest_target = None
-   # neutral_planets = [planet for planet in state.neutral_planets()
-    #                  if not any(fleet.destination_planet == planet.ID for fleet in state.my_fleets())]
-    #neutral_planets.sort(key=lambda p: p.num_ships)
 
     for target in state.neutral_planets():
         target_distance = state.distance(planet.ID, target.ID)
         if target_distance < least_distance:
-            required_ships = required_ships = target.num_ships + 1
+            required_ships = target.num_ships + 1
             if planet.num_ships > required_ships:
                 least_distance = target_distance
                 nearest_target = target
+
     if not nearest_target:
         return False
     else:
