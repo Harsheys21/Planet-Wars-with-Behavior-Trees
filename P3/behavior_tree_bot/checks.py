@@ -3,6 +3,11 @@
 def if_neutral_planet_available(state):
     return any(state.neutral_planets())
 
+def check_num_planets(state):
+    if len(state.my_planets()) > 3:
+        return True
+    else:
+        return False
 
 def have_largest_fleet(state):
     return sum(planet.num_ships for planet in state.my_planets()) \
