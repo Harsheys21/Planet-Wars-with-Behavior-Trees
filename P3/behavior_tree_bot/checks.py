@@ -1,4 +1,6 @@
 
+import numpy as np
+
 """
 Here is where you will implement your functions for state-based conditional checks. As with 
 actions, each function should only take the game state as a parameter. There are two
@@ -9,8 +11,12 @@ and have_largest_fleet.
 def if_neutral_planet_available(state):
     return any(state.neutral_planets())
 
+
 def few_planets(state):
-    if len(state.my_planets()) <= 2 :
+
+    total_num_planets = len(state.not_my_planets()) + len(state.my_planets())
+
+    if len(state.my_planets()) <= round(0.25*total_num_planets):
         return True
     
 def have_largest_fleet(state):
